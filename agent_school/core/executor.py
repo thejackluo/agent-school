@@ -154,13 +154,22 @@ class Executor:
             )
             result = response.choices[0].message.content
 
-        # Try to parse as JSON if it looks like JSON
+        # Try to parse as JSON - handle markdown code blocks and other LLM formats
         result = result.strip()
+        
+        # Strip markdown code blocks if present
+        if "```json" in result:
+            result = result.split("```json")[1].split("```")[0].strip()
+        elif "```" in result:
+            result = result.split("```")[1].split("```")[0].strip()
+        
+        # Try to parse as JSON
         if result.startswith("{") or result.startswith("["):
             try:
                 result = json.loads(result)
-            except json.JSONDecodeError:
-                pass  # Keep as string
+            except json.JSONDecodeError as e:
+                print(f"[WARNING] Failed to parse JSON: {e}")
+                # Keep as string if parsing fails
 
         return result
 
@@ -205,22 +214,44 @@ class Executor:
         sys.modules["workflow_module"] = workflow_module
         spec.loader.exec_module(workflow_module)
 
-        # Find main function (first non-private function)
-        main_function = None
-        for attr_name in dir(workflow_module):
-            attr = getattr(workflow_module, attr_name)
-            if callable(attr) and not attr_name.startswith('_'):
-                main_function = attr
-                break
+        # Get function name from metadata (preferred) or find by convention
+        metadata = workflow_entry.get("metadata", {})
+        function_name = metadata.get("function_name")
+        
+        if function_name and hasattr(workflow_module, function_name):
+            main_function = getattr(workflow_module, function_name)
+        else:
+            # Fallback: look for common function names
+            common_names = ["fetch_luma_events", "run", "main", "execute", "fetch", "scrape"]
+            main_function = None
+            for name in common_names:
+                if hasattr(workflow_module, name):
+                    main_function = getattr(workflow_module, name)
+                    break
+            
+            # Last resort: first function (not class) that's not private
+            if not main_function:
+                import inspect
+                for attr_name in dir(workflow_module):
+                    if attr_name.startswith('_'):
+                        continue
+                    attr = getattr(workflow_module, attr_name)
+                    if inspect.isfunction(attr):
+                        main_function = attr
+                        break
 
         if not main_function:
             raise ValueError(f"No main function found in workflow: {workflow_name}")
 
         print(f"[INFO] Calling workflow function: {main_function.__name__}")
 
-        # Call function with input data
+        # Filter input_data to only include keys that exist in schema
+        # This handles cases where LLM adds extra fields the workflow doesn't expect
         if isinstance(input_data, dict):
-            result = main_function(**input_data)
+            valid_keys = set(input_schema.keys())
+            filtered_input = {k: v for k, v in input_data.items() if k in valid_keys}
+            print(f"[DEBUG] Filtered input keys: {list(filtered_input.keys())}")
+            result = main_function(**filtered_input)
         else:
             result = main_function(input_data)
 

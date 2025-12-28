@@ -24,7 +24,7 @@ class Validator:
 
         Args:
             data: Input data to validate
-            schema: Expected schema
+            schema: Expected schema (can be flat {"field": "type"} or nested {"field": {"type": "..."}}
 
         Returns:
             (is_valid, error_message)
@@ -32,14 +32,28 @@ class Validator:
         if not schema:
             return True, None
 
-        for field_name, field_type in schema.items():
+        for field_name, field_spec in schema.items():
+            # Handle nested schema format: {"field": {"type": "string", "required": true, ...}}
+            if isinstance(field_spec, dict):
+                expected_type = field_spec.get("type", "string").lower()
+                is_required = field_spec.get("required", False)
+            else:
+                # Simple format: {"field": "string"}
+                expected_type = str(field_spec).lower()
+                is_required = True
+
             # Check if required field exists
             if field_name not in data:
-                return False, f"Missing required field: {field_name}"
+                if is_required:
+                    return False, f"Missing required field: {field_name}"
+                continue
 
             # Check type (basic type checking)
             value = data[field_name]
-            expected_type = field_type.lower()
+            
+            # Skip None values for optional fields
+            if value is None and not is_required:
+                continue
 
             if expected_type == "str" or expected_type == "string":
                 if not isinstance(value, str):
@@ -135,12 +149,17 @@ class Validator:
         """
         coerced = {}
 
-        for field_name, field_type in schema.items():
+        for field_name, field_spec in schema.items():
             if field_name not in data:
                 continue
 
             value = data[field_name]
-            expected_type = field_type.lower()
+            
+            # Handle nested schema format
+            if isinstance(field_spec, dict):
+                expected_type = field_spec.get("type", "string").lower()
+            else:
+                expected_type = str(field_spec).lower()
 
             try:
                 if expected_type in ["str", "string"]:

@@ -282,6 +282,6 @@ if __name__ == "__main__":
     # Default to chat mode if no command specified
     if len(sys.argv) == 1:
         # No arguments, go to interactive chat
-        chat()
+        chat(query=None)
     else:
         app()

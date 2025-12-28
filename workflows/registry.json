@@ -1,0 +1,169 @@
+{
+  "deterministic_workflows": {
+    "luma_scraper": {
+      "name": "luma_scraper",
+      "path": "workflows/deterministic/luma_scraper",
+      "description": "Deterministic workflow to extract events from Luma using browser automation",
+      "input_schema": {
+        "location": {
+          "type": "string",
+          "description": "Location to search for events (e.g., 'San Francisco', 'New York')",
+          "required": true,
+          "default": "San Francisco"
+        },
+        "radius": {
+          "type": "integer",
+          "description": "Search radius in miles (used for filtering)",
+          "required": false,
+          "default": 5
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Keywords to filter events (e.g., ['hip-hop', 'startup', 'tech'])",
+          "required": false,
+          "default": null
+        },
+        "max_results": {
+          "type": "integer",
+          "description": "Maximum number of results to return",
+          "required": false,
+          "default": 20
+        }
+      },
+      "output_schema": {
+        "type": "array",
+        "description": "List of events extracted from Luma",
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Event title"
+            },
+            "date": {
+              "type": "string",
+              "description": "Event date (ISO format YYYY-MM-DD or human-readable)"
+            },
+            "time": {
+              "type": "string",
+              "description": "Event time (e.g., '7:00 PM')"
+            },
+            "location": {
+              "type": "string",
+              "description": "Event location/venue"
+            },
+            "url": {
+              "type": "string",
+              "description": "Full URL to event page on Luma"
+            },
+            "description": {
+              "type": "string",
+              "description": "Event description (truncated to 200 chars)"
+            },
+            "host": {
+              "type": "string",
+              "description": "Event host/organizer name"
+            }
+          },
+          "required": [
+            "title",
+            "date",
+            "time",
+            "location",
+            "url"
+          ]
+        }
+      },
+      "method": "browser",
+      "created_at": "2025-12-28T09:30:01.026665",
+      "metadata": {
+        "name": "luma_scraper",
+        "display_name": "Luma Event Scraper",
+        "description": "Deterministic workflow to extract events from Luma using browser automation",
+        "type": "deterministic",
+        "version": "1.0.0",
+        "method": "browser",
+        "platform": "lu.ma",
+        "created_at": "2025-12-28",
+        "author": "Agent School",
+        "tags": [
+          "events",
+          "scraping",
+          "luma",
+          "browser-automation"
+        ],
+        "dependencies": {
+          "playwright": "^1.40.0"
+        },
+        "entry_point": "workflow.py",
+        "function_name": "fetch_luma_events",
+        "use_cases": [
+          "Find events by location and keywords",
+          "Discover tech meetups and parties",
+          "Aggregate event data for recommendations"
+        ],
+        "limitations": [
+          "Requires Playwright browser installation",
+          "Rate limited by Luma's website",
+          "DOM structure may change requiring updates",
+          "Search radius is approximate (client-side filtering)"
+        ],
+        "examples": [
+          {
+            "description": "Find hip-hop parties in San Francisco",
+            "input": {
+              "location": "San Francisco",
+              "radius": 5,
+              "keywords": [
+                "hip-hop",
+                "party"
+              ],
+              "max_results": 10
+            }
+          },
+          {
+            "description": "Find tech startup events in New York",
+            "input": {
+              "location": "New York",
+              "radius": 10,
+              "keywords": [
+                "startup",
+                "tech",
+                "YC"
+              ],
+              "max_results": 20
+            }
+          }
+        ]
+      }
+    }
+  },
+  "agent_plans": {
+    "personalized_event_finder": {
+      "name": "personalized_event_finder",
+      "path": "workflows/agent_plans/personalized_event_finder",
+      "description": "Layer 2 Agent Plan that finds and ranks events based on user preferences using LLM + deterministic workflows",
+      "uses_workflows": [
+        "luma_scraper"
+      ],
+      "num_steps": 5,
+      "created_at": "2025-12-28T09:30:01.027200",
+      "metadata": {
+        "created_at": "2025-12-28",
+        "author": "Agent School",
+        "tags": [
+          "events",
+          "personalization",
+          "recommendation",
+          "luma"
+        ],
+        "estimated_cost": "~$0.05 per execution (depends on LLM provider and number of events)",
+        "estimated_time": "10-15 seconds"
+      }
+    }
+  },
+  "last_updated": "2025-12-28T09:30:01.027203"
+}
