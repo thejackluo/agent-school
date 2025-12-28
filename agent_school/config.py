@@ -101,7 +101,7 @@ class Config:
 try:
     Config.validate()
     if Config.DEBUG:
-        print("✓ Configuration loaded successfully")
+        print("[OK] Configuration loaded successfully")
 except ValueError as e:
-    print(f"⚠️  Configuration Warning: {e}")
-    print("   Please check your .env file")
+    print(f"[WARNING] Configuration Warning: {e}")
+    print("         Please check your .env file")
