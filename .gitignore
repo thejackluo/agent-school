@@ -68,6 +68,3 @@ logs/
 
 # Claude artifacts
 .claude/
-
-# Workflows (generated content)
-workflows/
