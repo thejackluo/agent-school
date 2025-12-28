@@ -38,6 +38,7 @@ uv.lock
 generated_functions/
 *.workflow.py
 mcp_tools_config.json
+.luma_cache/
 
 # Testing
 .pytest_cache/
