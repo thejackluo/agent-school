@@ -4,7 +4,11 @@
       "Bash(uv init:*)",
       "Bash(uv add:*)",
       "Bash(uv:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Implement three-layer architecture core system\n\nLayer 1 \\(Deterministic\\): Pure Python workflows without LLM calls\n- deterministic_generator.py: Generates workflows with API/browser decision\n- registry.py: Central workflow discovery and indexing\n- validator.py: Schema validation at all boundaries\n\nLayer 2 \\(Agent Plans\\): LLM orchestration combining steps\n- agent_planner.py: Creates multi-step plans with LLM + deterministic workflows\n- executor.py: Executes agent plans with data flow management\n\nLayer 3 \\(Router\\): Natural language interface\n- router.py: Intent detection and routing to appropriate workflows/plans\n\nUtilities:\n- code_validator.py: Validates generated code for safety \\(added Optional import\\)\n- browser_helper.py: Playwright automation utilities\n- logger.py: Structured logging\n\nConfiguration:\n- Removed emojis from config.py as requested\n- Changed to [OK], [WARNING], [INFO] format\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)"
     ]
   }
 }
