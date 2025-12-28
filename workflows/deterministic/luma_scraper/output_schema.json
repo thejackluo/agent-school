@@ -1,0 +1,38 @@
+{
+  "type": "array",
+  "description": "List of events extracted from Luma",
+  "items": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "Event title"
+      },
+      "date": {
+        "type": "string",
+        "description": "Event date (ISO format YYYY-MM-DD or human-readable)"
+      },
+      "time": {
+        "type": "string",
+        "description": "Event time (e.g., '7:00 PM')"
+      },
+      "location": {
+        "type": "string",
+        "description": "Event location/venue"
+      },
+      "url": {
+        "type": "string",
+        "description": "Full URL to event page on Luma"
+      },
+      "description": {
+        "type": "string",
+        "description": "Event description (truncated to 200 chars)"
+      },
+      "host": {
+        "type": "string",
+        "description": "Event host/organizer name"
+      }
+    },
+    "required": ["title", "date", "time", "location", "url"]
+  }
+}

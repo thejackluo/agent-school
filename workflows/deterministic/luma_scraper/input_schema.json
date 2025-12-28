@@ -1,0 +1,29 @@
+{
+  "location": {
+    "type": "string",
+    "description": "Location to search for events (e.g., 'San Francisco', 'New York')",
+    "required": true,
+    "default": "San Francisco"
+  },
+  "radius": {
+    "type": "integer",
+    "description": "Search radius in miles (used for filtering)",
+    "required": false,
+    "default": 5
+  },
+  "keywords": {
+    "type": "array",
+    "items": {
+      "type": "string"
+    },
+    "description": "Keywords to filter events (e.g., ['hip-hop', 'startup', 'tech'])",
+    "required": false,
+    "default": null
+  },
+  "max_results": {
+    "type": "integer",
+    "description": "Maximum number of results to return",
+    "required": false,
+    "default": 20
+  }
+}

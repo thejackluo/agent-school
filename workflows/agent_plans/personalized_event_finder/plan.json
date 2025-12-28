@@ -1,0 +1,86 @@
+{
+  "name": "personalized_event_finder",
+  "display_name": "Personalized Event Finder",
+  "description": "Layer 2 Agent Plan that finds and ranks events based on user preferences using LLM + deterministic workflows",
+  "version": "1.0.0",
+  "type": "agent_plan",
+  "uses_workflows": ["luma_scraper"],
+  "steps": [
+    {
+      "id": 1,
+      "type": "llm",
+      "action": "parse_user_preferences",
+      "prompt": "Extract the following from the user's request: location, keywords (array), and preferred event size (small/medium/large). User input: {user_input}\n\nReturn ONLY valid JSON with this structure:\n{\n  \"location\": \"city name\",\n  \"keywords\": [\"keyword1\", \"keyword2\"],\n  \"size_preference\": \"small|medium|large\",\n  \"max_results\": 20\n}\n\nIf location is not specified, use 'San Francisco'. If no keywords, use empty array.",
+      "output_var": "search_params",
+      "output_format": "json"
+    },
+    {
+      "id": 2,
+      "type": "deterministic",
+      "workflow": "luma_scraper",
+      "description": "Call the deterministic Luma scraper with parsed parameters",
+      "input_from": "search_params",
+      "output_var": "raw_events",
+      "error_handling": "continue"
+    },
+    {
+      "id": 3,
+      "type": "llm",
+      "action": "validate_and_filter",
+      "prompt": "You have {raw_events|length} events from Luma. Filter and validate them:\n\n1. Remove any events with missing critical data (no title, no date)\n2. Ensure dates are in the future\n3. Remove duplicates\n\nOriginal user request: {user_input}\nSearch parameters: {search_params}\nRaw events: {raw_events}\n\nReturn ONLY valid JSON array of filtered events.",
+      "input_from": ["raw_events", "search_params", "user_input"],
+      "output_var": "filtered_events",
+      "output_format": "json"
+    },
+    {
+      "id": 4,
+      "type": "llm",
+      "action": "rank_by_relevance",
+      "prompt": "Rank these events by relevance to the user's preferences.\n\nUser request: {user_input}\nUser preferences: {search_params}\nFiltered events: {filtered_events}\n\nConsider:\n- Keyword match strength\n- Event size matching preference\n- Date proximity\n- Venue quality indicators\n\nReturn events ranked from most to least relevant. Return ONLY valid JSON array.\nLimit to top 10 events.",
+      "input_from": ["filtered_events", "search_params", "user_input"],
+      "output_var": "ranked_events",
+      "output_format": "json"
+    },
+    {
+      "id": 5,
+      "type": "llm",
+      "action": "format_response",
+      "prompt": "Format these events into a friendly, conversational response for the user.\n\nUser's original request: {user_input}\nRanked events: {ranked_events}\n\nProvide:\n1. A brief intro acknowledging their request\n2. Top 3-5 events with:\n   - Title\n   - Date and time\n   - Location\n   - Brief description of why it matches their preferences\n   - URL\n3. A friendly closing\n\nBe conversational, helpful, and enthusiastic. Use formatting for readability.",
+      "input_from": ["ranked_events", "user_input"],
+      "output_var": "final_response",
+      "output_format": "text"
+    }
+  ],
+  "input_schema": {
+    "user_input": {
+      "type": "string",
+      "description": "Natural language request from user",
+      "required": true
+    }
+  },
+  "output_schema": {
+    "type": "string",
+    "description": "Formatted, conversational response with personalized event recommendations"
+  },
+  "examples": [
+    {
+      "input": "Find hip-hop parties in SF within 5 miles",
+      "expected_flow": "Parse location (SF) and keywords (hip-hop, parties) → Fetch from Luma → Filter → Rank → Format"
+    },
+    {
+      "input": "YC co-founder events in San Francisco",
+      "expected_flow": "Parse keywords (YC, co-founder, startup) → Fetch → Filter → Rank by YC relevance → Format"
+    },
+    {
+      "input": "Small tech meetups in New York this week",
+      "expected_flow": "Parse location (NY), size (small), keywords (tech) → Fetch → Filter by date → Rank small events higher → Format"
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-12-28",
+    "author": "Agent School",
+    "tags": ["events", "personalization", "recommendation", "luma"],
+    "estimated_cost": "~$0.05 per execution (depends on LLM provider and number of events)",
+    "estimated_time": "10-15 seconds"
+  }
+}

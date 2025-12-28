@@ -1,0 +1,48 @@
+{
+  "name": "luma_scraper",
+  "display_name": "Luma Event Scraper",
+  "description": "Deterministic workflow to extract events from Luma using browser automation",
+  "type": "deterministic",
+  "version": "1.0.0",
+  "method": "browser",
+  "platform": "lu.ma",
+  "created_at": "2025-12-28",
+  "author": "Agent School",
+  "tags": ["events", "scraping", "luma", "browser-automation"],
+  "dependencies": {
+    "playwright": "^1.40.0"
+  },
+  "entry_point": "workflow.py",
+  "function_name": "fetch_luma_events",
+  "use_cases": [
+    "Find events by location and keywords",
+    "Discover tech meetups and parties",
+    "Aggregate event data for recommendations"
+  ],
+  "limitations": [
+    "Requires Playwright browser installation",
+    "Rate limited by Luma's website",
+    "DOM structure may change requiring updates",
+    "Search radius is approximate (client-side filtering)"
+  ],
+  "examples": [
+    {
+      "description": "Find hip-hop parties in San Francisco",
+      "input": {
+        "location": "San Francisco",
+        "radius": 5,
+        "keywords": ["hip-hop", "party"],
+        "max_results": 10
+      }
+    },
+    {
+      "description": "Find tech startup events in New York",
+      "input": {
+        "location": "New York",
+        "radius": 10,
+        "keywords": ["startup", "tech", "YC"],
+        "max_results": 20
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "personalized_event_finder",
+  "display_name": "Personalized Event Finder",
+  "description": "Multi-step agent plan that finds, filters, ranks, and formats events based on user preferences",
+  "type": "agent_plan",
+  "version": "1.0.0",
+  "created_at": "2025-12-28",
+  "author": "Agent School",
+  "layer": 2,
+  "uses_workflows": ["luma_scraper"],
+  "steps_count": 5,
+  "llm_steps": 4,
+  "deterministic_steps": 1,
+  "tags": ["events", "personalization", "recommendation", "multi-step"],
+  "complexity": "medium",
+  "use_cases": [
+    "Natural language event search",
+    "Personalized event recommendations",
+    "Event discovery with preference matching"
+  ],
+  "advantages": [
+    "Combines LLM intelligence with deterministic scraping",
+    "Personalizes results based on user preferences",
+    "Handles ambiguous natural language input",
+    "Ranks events by relevance automatically"
+  ],
+  "cost_estimate": {
+    "per_execution": "$0.03-0.08",
+    "depends_on": "LLM provider, number of events, input complexity"
+  },
+  "performance": {
+    "avg_execution_time": "10-15 seconds",
+    "bottlenecks": ["Browser automation in step 2", "LLM API latency"]
+  }
+}
