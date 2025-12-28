@@ -12,6 +12,7 @@ Usage:
 
 import sys
 import typer
+from typing import Dict, Optional
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
