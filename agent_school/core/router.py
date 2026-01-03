@@ -5,12 +5,18 @@ Routes user requests to appropriate actions:
 - Create new workflow
 - Create new agent plan
 - Execute existing plan
+- Execute cached certification (deterministic)
+- Explore and certify new browser tasks
 - Show help/guidance
 
-Acts as a conversational mentor for non-technical users.
+Now with Agent Certification support:
+- Checks for existing certifications before LLM-heavy exploration
+- Executes certified workflows at near-zero cost
+- Falls back to exploration when no certification exists
 """
 
 import json
+import asyncio
 from typing import Dict, Any, Literal, Optional
 from anthropic import Anthropic
 from openai import OpenAI
@@ -19,6 +25,19 @@ from ..config import Config
 from .registry import Registry
 from .executor import Executor
 
+# Certification module imports
+try:
+    from ..certification import (
+        CertificationRegistry,
+        CertifiedExecutor,
+        ExplorationAgent,
+        CertificationSynthesizer,
+        DriftDetector,
+        DocIngester,
+    )
+    CERTIFICATION_AVAILABLE = True
+except ImportError:
+    CERTIFICATION_AVAILABLE = False
 
 class Router:
     """
@@ -48,6 +67,16 @@ class Router:
 
         self.registry = registry or Registry()
         self.executor = Executor(llm_provider, model, registry)
+        
+        # Initialize certification components
+        if CERTIFICATION_AVAILABLE:
+            self.cert_registry = CertificationRegistry()
+            self.cert_executor = CertifiedExecutor(headless=True)
+            self.explorer = ExplorationAgent(llm_provider=llm_provider)
+            self.synthesizer = CertificationSynthesizer(llm_provider=llm_provider)
+            self.drift_detector = DriftDetector(self.explorer, self.synthesizer)
+        else:
+            self.cert_registry = None
 
     def route(self, user_input: str) -> Dict[str, Any]:
         """
@@ -77,6 +106,8 @@ class Router:
 
         if action == "execute":
             return self._handle_execute(user_input, intent)
+        elif action == "browser_task":
+            return self._handle_browser_task(user_input, intent)
         elif action == "create_workflow":
             return self._handle_create_workflow(user_input, intent)
         elif action == "create_plan":
@@ -88,7 +119,7 @@ class Router:
         else:
             return {
                 "action": "help",
-                "response": "I'm not sure what you want to do. Could you clarify? I can help you:\n- Find events or data\n- Create new workflows\n- Set up automation\n\nWhat would you like to do?"
+                "response": "I'm not sure what you want to do. Could you clarify? I can help you:\n- Find events or data\n- Automate browser tasks (Gmail, Google Docs, etc.)\n- Create new workflows\n- Set up automation\n\nWhat would you like to do?"
             }
 
     def _analyze_intent(self, user_input: str) -> Dict[str, Any]:
@@ -101,18 +132,25 @@ class Router:
 
 Available actions:
 1. "execute" - User wants to run an existing workflow (e.g., "find events in SF")
-2. "create_workflow" - User wants to create a new data extraction workflow
-3. "create_plan" - User wants to create an agent orchestration plan
-4. "list" - User wants to see what's available
-5. "help" - User needs guidance
+2. "browser_task" - User wants to perform a browser-based task on a website (e.g., "compose an email", "create a Google Doc", "update a spreadsheet")
+3. "create_workflow" - User wants to create a new data extraction workflow
+4. "create_plan" - User wants to create an agent orchestration plan
+5. "list" - User wants to see what's available
+6. "help" - User needs guidance
+
+Detect "browser_task" when users want to:
+- Interact with web applications (Gmail, Google Docs, Sheets, social media, etc.)
+- Perform actions like compose, send, create, edit, post, click, navigate
+- Automate repetitive browser interactions
 
 Analyze the user's input and respond with JSON:
 {
-  "action": "execute" | "create_workflow" | "create_plan" | "list" | "help",
+  "action": "execute" | "browser_task" | "create_workflow" | "create_plan" | "list" | "help",
   "confidence": 0.0 to 1.0,
   "reasoning": "why you chose this action",
   "extracted_info": {
     // For execute: {task, platform, filters}
+    // For browser_task: {task, domain, parameters}
     // For create_workflow: {platform, description}
     // For create_plan: {goal, workflows_needed}
   }
@@ -158,6 +196,183 @@ Analyze the intent and respond with JSON only."""
             intent = {"action": "help", "confidence": 0}
 
         return intent
+    
+    def _handle_browser_task(self, user_input: str, intent: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Handle browser automation tasks with certification routing.
+        
+        The Learning Loop:
+        1. Check if certification exists for this task
+        2. If yes: Execute certification (near-zero cost)
+        3. If no: Explore with ReAct, synthesize certification, save for future
+        """
+        if not CERTIFICATION_AVAILABLE or not self.cert_registry:
+            return {
+                "action": "help",
+                "response": "Browser automation is not available. Please install browser-use with: uv add browser-use"
+            }
+        
+        extracted_info = intent.get("extracted_info", {})
+        task = extracted_info.get("task", user_input)
+        domain = extracted_info.get("domain", self._infer_domain(user_input))
+        
+        print(f"[INFO] Browser task: {task}")
+        print(f"[INFO] Domain: {domain}")
+        
+        # Check for existing certification
+        cert = self.cert_registry.find_for_task(task, domain)
+        
+        if cert:
+            # Phase C: Execute cached certification
+            print(f"[INFO] Found certification: {cert.name} (v{cert.version})")
+            return self._execute_certification(cert, user_input, extracted_info)
+        else:
+            # Phase A + B: Explore and synthesize
+            print(f"[INFO] No certification found. Starting exploration...")
+            return self._explore_and_certify(task, domain, user_input)
+    
+    def _execute_certification(
+        self, 
+        cert, 
+        user_input: str, 
+        extracted_info: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Execute a cached certification with drift detection."""
+        try:
+            # Extract parameters from user input
+            params = self.cert_executor.bind_params_from_input(cert, user_input)
+            params.update(extracted_info.get("parameters", {}))
+            
+            # Check for missing required parameters
+            missing_params = []
+            for param in cert.parameters:
+                if param.required and param.name not in params:
+                    missing_params.append(param.name)
+            
+            if missing_params:
+                # Fall back to exploration - can't execute without required params
+                print(f"[INFO] Missing required params: {missing_params}. Falling back to exploration...")
+                return self._explore_and_certify(
+                    extracted_info.get("task", user_input), 
+                    extracted_info.get("domain", self._infer_domain(user_input)),
+                    user_input
+                )
+            
+            # Execute with self-healing
+            result, updated_cert = asyncio.get_event_loop().run_until_complete(
+                self.drift_detector.execute_with_healing(
+                    cert, params, self.cert_executor
+                )
+            )
+            
+            # Update certification if healed
+            if updated_cert:
+                self.cert_registry.register(updated_cert)
+                print(f"[INFO] Certification healed: v{updated_cert.version}")
+            
+            if result.success:
+                return {
+                    "action": "browser_task",
+                    "certification_used": cert.name,
+                    "result": result.final_result,
+                    "response": f"✅ Completed: {cert.task_description}\n\n{result.final_result or 'Task executed successfully.'}",
+                    "execution_cost": "$0.00 (cached certification)"
+                }
+            else:
+                return {
+                    "action": "browser_task",
+                    "certification_used": cert.name,
+                    "error": result.error_message,
+                    "response": f"❌ Task failed: {result.error_message}\n\nWould you like me to re-learn this workflow?"
+                }
+                
+        except KeyError as ke:
+            # Missing parameter - fall back to exploration
+            print(f"[INFO] Missing param {ke}. Falling back to exploration...")
+            return self._explore_and_certify(
+                extracted_info.get("task", user_input),
+                extracted_info.get("domain", self._infer_domain(user_input)),
+                user_input
+            )
+        except Exception as e:
+            return {
+                "action": "browser_task",
+                "error": str(e),
+                "response": f"❌ Error executing certification: {e}"
+            }
+
+    
+    def _explore_and_certify(self, task: str, domain: str, user_input: str) -> Dict[str, Any]:
+        """Explore a task and create a certification."""
+        try:
+            # Run exploration with FULL user input (not just extracted task summary)
+            # The user_input contains all the details like recipients, content, etc.
+            result = asyncio.get_event_loop().run_until_complete(
+                self.explorer.explore(user_input, domain)  # Use user_input, not task!
+            )
+            
+            if not result.success:
+                return {
+                    "action": "browser_task",
+                    "exploration_id": result.exploration_id,
+                    "error": result.error_message,
+                    "response": f"❌ Exploration failed: {result.error_message}\n\nThis task may require additional guidance or permissions."
+                }
+            
+            # Try to synthesize certification (may fail on complex histories)
+            cert_saved = False
+            try:
+                if result.action_log and result.action_log.actions:
+                    print(f"[INFO] Exploration successful. Synthesizing certification...")
+                    cert = self.synthesizer.synthesize(result.action_log)
+                    
+                    # Save certification
+                    cert_path = self.cert_registry.register(cert)
+                    print(f"[INFO] Certification saved: {cert_path}")
+                    cert_saved = True
+                else:
+                    print(f"[INFO] No actions logged, skipping certification synthesis")
+            except Exception as synth_err:
+                print(f"[WARN] Certification synthesis failed: {synth_err}")
+                # Continue - task may have still succeeded
+            
+            response_suffix = "\n\n📚 I've learned this workflow! Next time will be instant." if cert_saved else ""
+            
+            return {
+                "action": "browser_task",
+                "exploration_id": result.exploration_id,
+                "result": result.final_result,
+                "response": f"✅ Completed: {task}\n\n{result.final_result or 'Task executed successfully.'}{response_suffix}",
+                "execution_cost": f"~${result.cost_estimate:.2f} (exploration)"
+            }
+            
+        except Exception as e:
+            return {
+                "action": "browser_task",
+                "error": str(e),
+                "response": f"❌ Error during exploration: {e}"
+            }
+
+    
+    def _infer_domain(self, user_input: str) -> str:
+        """Infer domain from user input."""
+        input_lower = user_input.lower()
+        
+        # Common domain mappings
+        domain_keywords = {
+            "mail.google.com": ["gmail", "email", "mail", "inbox", "compose"],
+            "docs.google.com": ["google doc", "gdoc", "document"],
+            "sheets.google.com": ["spreadsheet", "sheet", "google sheet"],
+            "twitter.com": ["twitter", "tweet", "x.com"],
+            "linkedin.com": ["linkedin", "connection"],
+        }
+        
+        for domain, keywords in domain_keywords.items():
+            if any(kw in input_lower for kw in keywords):
+                return domain
+        
+        # Default to a generic domain
+        return "unknown"
 
     def _handle_execute(self, user_input: str, intent: Dict[str, Any]) -> Dict[str, Any]:
         """Handle execution of existing plan."""

@@ -1,0 +1,74 @@
+{
+  "exploration_id": "26cc471e",
+  "task": "write something funny",
+  "domain": "docs.google.com",
+  "start_time": "2026-01-02T19:22:43.088231",
+  "end_time": "2026-01-02T19:22:43.088249",
+  "actions": [
+    {
+      "timestamp": "2026-01-02T19:22:43.088231",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    },
+    {
+      "timestamp": "2026-01-02T19:22:43.088243",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    },
+    {
+      "timestamp": "2026-01-02T19:22:43.088245",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    },
+    {
+      "timestamp": "2026-01-02T19:22:43.088247",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    },
+    {
+      "timestamp": "2026-01-02T19:22:43.088249",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    }
+  ],
+  "success": 

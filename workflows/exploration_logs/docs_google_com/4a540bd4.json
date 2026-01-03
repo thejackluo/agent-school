@@ -1,0 +1,61 @@
+{
+  "exploration_id": "4a540bd4",
+  "task": "create a new google doc and write something funny in it",
+  "domain": "docs.google.com",
+  "start_time": "2026-01-02T19:26:57.496977",
+  "end_time": "2026-01-02T19:26:57.496996",
+  "actions": [
+    {
+      "timestamp": "2026-01-02T19:26:57.496977",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    },
+    {
+      "timestamp": "2026-01-02T19:26:57.496991",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    },
+    {
+      "timestamp": "2026-01-02T19:26:57.496994",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    },
+    {
+      "timestamp": "2026-01-02T19:26:57.496996",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    }
+  ],
+  "success": 

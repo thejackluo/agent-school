@@ -1,18 +1,6 @@
 {
-  "timestamp": 1766944078.146251,
+  "timestamp": 1767037686.412915,
   "value": [
-    {
-      "title": "Sewing And S\u2019mores With Chaz",
-      "url": "https://lu.ma/21ewsa93",
-      "slug": "21ewsa93",
-      "source": "arts"
-    },
-    {
-      "title": "DarkMode",
-      "url": "https://lu.ma/1u8ww815",
-      "slug": "1u8ww815",
-      "source": "arts"
-    },
     {
       "title": "Visualist Night 3",
       "url": "https://lu.ma/3z6b2cjf",
@@ -59,6 +47,18 @@
       "title": "the intersection of art & technology #14",
       "url": "https://lu.ma/tiat14",
       "slug": "tiat14",
+      "source": "arts"
+    },
+    {
+      "title": "we're doing the artists way (together) - week 9",
+      "url": "https://lu.ma/pciw8p7y",
+      "slug": "pciw8p7y",
+      "source": "arts"
+    },
+    {
+      "title": "Nature of Code - Chapter 3 Oscillation",
+      "url": "https://lu.ma/NOC3",
+      "slug": "NOC3",
       "source": "arts"
     }
   ]

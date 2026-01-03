@@ -1,0 +1,48 @@
+{
+  "certifications": {
+    "email/compose_and_send_email": {
+      "name": "compose_and_send_email",
+      "domain": "email",
+      "task_description": "compose and send email",
+      "task_patterns": [
+        "compose.*email",
+        "send.*email.*to.*",
+        "write.*email",
+        "create.*new.*message",
+        "draft.*email"
+      ],
+      "version": 1,
+      "created_at": "2026-01-02T19:34:18.803165",
+      "path": "workflows/certifications/email/compose_and_send_email/certification.json"
+    },
+    "email/send_an_email_to": {
+      "name": "send_an_email_to",
+      "domain": "email",
+      "task_description": "send an email to Jack Luo about how we are grinding at the hotel",
+      "task_patterns": [
+        "send an email to .+ about .+",
+        "email .+ regarding .+",
+        "compose (?:an )?email to .+ (?:about|regarding) .+",
+        "write (?:an )?email to .+ telling them about .+"
+      ],
+      "version": 1,
+      "created_at": "2026-01-02T19:45:15.081333",
+      "path": "workflows/certifications/email/send_an_email_to/certification.json"
+    },
+    "email/can_we_send_an": {
+      "name": "can_we_send_an",
+      "domain": "email",
+      "task_description": "can we send an email to Jack Luo about how we're grinding so hard at the hotel in Japantown?",
+      "task_patterns": [
+        ".*send.*email.*to.*(\\w+\\s+\\w+).*about.*",
+        ".*email.*(\\w+\\s+\\w+).*regarding.*",
+        ".*compose.*email.*for.*(\\w+\\s+\\w+).*",
+        ".*write.*email.*to.*(\\w+\\s+\\w+).*telling.*"
+      ],
+      "version": 1,
+      "created_at": "2026-01-02T19:51:57.510743",
+      "path": "workflows/certifications/email/can_we_send_an/certification.json"
+    }
+  },
+  "last_updated": "2026-01-02T19:51:57.513758"
+}

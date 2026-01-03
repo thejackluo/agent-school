@@ -1,0 +1,48 @@
+{
+  "exploration_id": "9ec19dd0",
+  "task": "create_google_doc",
+  "domain": "docs.google.com",
+  "start_time": "2026-01-02T19:19:41.784307",
+  "end_time": "2026-01-02T19:19:41.784321",
+  "actions": [
+    {
+      "timestamp": "2026-01-02T19:19:41.784307",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    },
+    {
+      "timestamp": "2026-01-02T19:19:41.784319",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    },
+    {
+      "timestamp": "2026-01-02T19:19:41.784321",
+      "action_type": "unknown",
+      "description": "unknown: element",
+      "element_text": null,
+      "element_role": null,
+      "element_selector": null,
+      "input_value": null,
+      "url": null,
+      "success": true,
+      "error_message": null,
+      "screenshot_path": null
+    }
+  ],
+  "success": 

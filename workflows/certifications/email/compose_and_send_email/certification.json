@@ -1,0 +1,154 @@
+{
+  "name": "compose_and_send_email",
+  "domain": "email",
+  "task_description": "compose and send email",
+  "task_patterns": [
+    "compose.*email",
+    "send.*email.*to.*",
+    "write.*email",
+    "create.*new.*message",
+    "draft.*email"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "action": "click",
+      "description": "Click compose or new email button to start creating an email",
+      "selector_strategy": "text",
+      "selector_value": "Compose",
+      "value": null,
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 2,
+      "action": "click",
+      "description": "Enter recipient email address in the To field",
+      "selector_strategy": "aria",
+      "selector_value": "[aria-label*='To']",
+      "value": "{recipient_email}",
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 3,
+      "action": "click",
+      "description": "Enter email subject in the subject field",
+      "selector_strategy": "placeholder",
+      "selector_value": "Subject",
+      "value": "{email_subject}",
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 4,
+      "action": "click",
+      "description": "Enter email content in the message body",
+      "selector_strategy": "aria",
+      "selector_value": "[aria-label*='Message body']",
+      "value": "{email_body}",
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 5,
+      "action": "click",
+      "description": "Click send button to send the email",
+      "selector_strategy": "text",
+      "selector_value": "Send",
+      "value": null,
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 6,
+      "action": "click",
+      "description": "Wait for confirmation or navigate back to inbox",
+      "selector_strategy": "text",
+      "selector_value": "Message sent",
+      "value": null,
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 7,
+      "action": "click",
+      "description": "Additional confirmation or cleanup step",
+      "selector_strategy": "text",
+      "selector_value": "Inbox",
+      "value": null,
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 8,
+      "action": "click",
+      "description": "Verify email appears in sent folder",
+      "selector_strategy": "text",
+      "selector_value": "Sent",
+      "value": null,
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 9,
+      "action": "click",
+      "description": "Final verification or return to main email view",
+      "selector_strategy": "aria",
+      "selector_value": "[aria-label*='Mail']",
+      "value": null,
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    }
+  ],
+  "parameters": [
+    {
+      "name": "recipient_email",
+      "description": "Email address of the recipient",
+      "type": "string",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "email_subject",
+      "description": "Subject line for the email",
+      "type": "string",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "email_body",
+      "description": "Main content/message of the email",
+      "type": "string",
+      "required": true,
+      "default": null
+    }
+  ],
+  "created_at": "2026-01-02T19:34:18.803165",
+  "updated_at": "2026-01-02T19:34:18.803174",
+  "version": 1,
+  "success_count": 0,
+  "failure_count": 0,
+  "last_success": null,
+  "last_failure": null,
+  "source_exploration_id": "ff971377",
+  "source_docs": null
+}

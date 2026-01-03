@@ -1,10 +1,22 @@
 {
-  "timestamp": 1766946522.3435059,
+  "timestamp": 1767037662.7872078,
   "value": [
+    {
+      "title": "Strudel Sessions: Make Music with Code",
+      "url": "https://lu.ma/sw8qgw1m",
+      "slug": "sw8qgw1m",
+      "source": "sf"
+    },
     {
       "title": "Vibe Coding: Unreal Engine 5 w/ Cline - Open Registration",
       "url": "https://lu.ma/vibe-coding-unreal-engine-5-w-cline",
       "slug": "vibe-coding-unreal-engine-5-w-cline",
+      "source": "sf"
+    },
+    {
+      "title": "mam\u012b no. 4 - opening pages",
+      "url": "https://lu.ma/4fahpllt",
+      "slug": "4fahpllt",
       "source": "sf"
     },
     {
@@ -98,6 +110,12 @@
       "source": "sf"
     },
     {
+      "title": "Dream BIG, Build Small: A Showcase for Small Scale Developers & Builders (Bay Area)",
+      "url": "https://lu.ma/ka698ieq",
+      "slug": "ka698ieq",
+      "source": "sf"
+    },
+    {
       "title": "Longevity Biotech JPM Event by The Longevity Investor Network - 2026",
       "url": "https://lu.ma/23k1y1ld",
       "slug": "23k1y1ld",
@@ -131,24 +149,6 @@
       "title": "-1 to DoorDash with Tony Xu",
       "url": "https://lu.ma/spc-tony-xu",
       "slug": "spc-tony-xu",
-      "source": "sf"
-    },
-    {
-      "title": "APOLLO HOUSE",
-      "url": "https://lu.ma/2026apollohouse",
-      "slug": "2026apollohouse",
-      "source": "sf"
-    },
-    {
-      "title": "JPM Healthcare Conference Happy Hour",
-      "url": "https://lu.ma/e3v9tw67",
-      "slug": "e3v9tw67",
-      "source": "sf"
-    },
-    {
-      "title": "JPM week 2026: Scaling Healthcare Marketplaces with AI",
-      "url": "https://lu.ma/tj4qcuni",
-      "slug": "tj4qcuni",
       "source": "sf"
     }
   ]

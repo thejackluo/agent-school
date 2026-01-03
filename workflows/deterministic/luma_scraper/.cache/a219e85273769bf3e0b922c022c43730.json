@@ -1,12 +1,6 @@
 {
-  "timestamp": 1766944066.4912739,
+  "timestamp": 1767037674.5873039,
   "value": [
-    {
-      "title": "Turn of the Year Phylactery Party",
-      "url": "https://lu.ma/3ds9wbql",
-      "slug": "3ds9wbql",
-      "source": "ai"
-    },
     {
       "title": "Unlocking AI Literacy for Educators",
       "url": "https://lu.ma/t8eah3ox",
@@ -23,6 +17,12 @@
       "title": "Interact AI - SF Marketers Meetup",
       "url": "https://lu.ma/c3wrjcik",
       "slug": "c3wrjcik",
+      "source": "ai"
+    },
+    {
+      "title": "Founders Gatherings",
+      "url": "https://lu.ma/jmubbrzq",
+      "slug": "jmubbrzq",
       "source": "ai"
     },
     {
@@ -56,9 +56,9 @@
       "source": "ai"
     },
     {
-      "title": "Voice AI Builders Meetup with Modal & Phonic",
-      "url": "https://lu.ma/rdwya8zu",
-      "slug": "rdwya8zu",
+      "title": "Encoding Information in Quantum Materials",
+      "url": "https://lu.ma/asejq5st",
+      "slug": "asejq5st",
       "source": "ai"
     }
   ]

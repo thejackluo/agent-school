@@ -1,0 +1,10 @@
+{
+  "exploration_id": "9523d3e7",
+  "task": "compose and send email",
+  "domain": "gmail.com",
+  "start_time": "2026-01-02T18:57:10.658381",
+  "end_time": "2026-01-02T18:57:10.658385",
+  "actions": [],
+  "success": false,
+  "final_result": null
+}

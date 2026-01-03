@@ -1,6 +1,12 @@
 {
-  "timestamp": 1766944083.813478,
+  "timestamp": 1767037693.1412952,
   "value": [
+    {
+      "title": "NYE QTPOC TIDEPOOLING \ud83c\udf86",
+      "url": "https://lu.ma/caygs2ns",
+      "slug": "caygs2ns",
+      "source": "climate"
+    },
     {
       "title": "East Bay Climate Changemakers Hour of Action",
       "url": "https://lu.ma/pf20fim9",
@@ -26,9 +32,9 @@
       "source": "climate"
     },
     {
-      "title": "Dream BIG, Build Small: A Showcase for Small Scale Developers & Builders (Bay Area)",
-      "url": "https://lu.ma/ka698ieq",
-      "slug": "ka698ieq",
+      "title": "Climate Justice in Chinatown: An Oakland Walking Tour",
+      "url": "https://lu.ma/6f7dh6jf",
+      "slug": "6f7dh6jf",
       "source": "climate"
     },
     {
@@ -53,12 +59,6 @@
       "title": "Degrowth Book Club - The Day the World Stops Shopping",
       "url": "https://lu.ma/vs1jvka0",
       "slug": "vs1jvka0",
-      "source": "climate"
-    },
-    {
-      "title": "Water Futures: Flood Zone",
-      "url": "https://lu.ma/floodzone",
-      "slug": "floodzone",
       "source": "climate"
     }
   ]

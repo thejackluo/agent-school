@@ -1,6 +1,12 @@
 {
-  "timestamp": 1766944072.278235,
+  "timestamp": 1767037680.349937,
   "value": [
+    {
+      "title": "Founders Gatherings",
+      "url": "https://lu.ma/jmubbrzq",
+      "slug": "jmubbrzq",
+      "source": "crypto"
+    },
     {
       "title": "2026 SVB Crypto Market Insights",
       "url": "https://lu.ma/tpzmr6c5",
@@ -17,6 +23,12 @@
       "title": "GTM at the Edge: Scaling AI, Crypto, robotics & Deep Tech Products + Start Up Pitches - Open Registration",
       "url": "https://lu.ma/gtm-at-the-edge-scaling-ai-crypto-roboti-418f",
       "slug": "gtm-at-the-edge-scaling-ai-crypto-roboti-418f",
+      "source": "crypto"
+    },
+    {
+      "title": "Agentic Commerce on Arc",
+      "url": "https://lu.ma/arc-commerce-sf",
+      "slug": "arc-commerce-sf",
       "source": "crypto"
     },
     {
@@ -47,12 +59,6 @@
       "title": "NEARCON 2026 SF",
       "url": "https://lu.ma/NearconSF",
       "slug": "NearconSF",
-      "source": "crypto"
-    },
-    {
-      "title": "AI x Crypto Expo 2026 - 10-Day Innovation Series",
-      "url": "https://lu.ma/4bimmw4y",
-      "slug": "4bimmw4y",
       "source": "crypto"
     }
   ]

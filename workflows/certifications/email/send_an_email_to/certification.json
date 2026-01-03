@@ -1,0 +1,148 @@
+{
+  "name": "send_an_email_to",
+  "domain": "email",
+  "task_description": "send an email to Jack Luo about how we are grinding at the hotel",
+  "task_patterns": [
+    "send an email to .+ about .+",
+    "email .+ regarding .+",
+    "compose (?:an )?email to .+ (?:about|regarding) .+",
+    "write (?:an )?email to .+ telling them about .+"
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "action": "click",
+      "description": "Navigate to email application or compose page",
+      "selector_strategy": "text",
+      "selector_value": "Compose",
+      "value": null,
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 2,
+      "action": "click",
+      "description": "Click compose new email button",
+      "selector_strategy": "aria",
+      "selector_value": "[aria-label='Compose new email']",
+      "value": null,
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 3,
+      "action": "click",
+      "description": "Enter recipient email address",
+      "selector_strategy": "placeholder",
+      "selector_value": "To",
+      "value": "{recipient_email}",
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 4,
+      "action": "click",
+      "description": "Enter email subject line",
+      "selector_strategy": "placeholder",
+      "selector_value": "Subject",
+      "value": "{email_subject}",
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 5,
+      "action": "click",
+      "description": "Enter email body content",
+      "selector_strategy": "aria",
+      "selector_value": "[aria-label='Message body']",
+      "value": "{email_body}",
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 6,
+      "action": "click",
+      "description": "Review email content before sending",
+      "selector_strategy": "text",
+      "selector_value": "Preview",
+      "value": null,
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 7,
+      "action": "click",
+      "description": "Click send email button",
+      "selector_strategy": "text",
+      "selector_value": "Send",
+      "value": null,
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    },
+    {
+      "id": 8,
+      "action": "click",
+      "description": "Confirm email was sent successfully",
+      "selector_strategy": "text",
+      "selector_value": "Message sent",
+      "value": null,
+      "wait_for": null,
+      "timeout_ms": 10000,
+      "optional": false,
+      "fallback_step": null
+    }
+  ],
+  "parameters": [
+    {
+      "name": "recipient_email",
+      "description": "Email address of the recipient",
+      "type": "string",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "recipient_name",
+      "description": "Name of the email recipient",
+      "type": "string",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "email_subject",
+      "description": "Subject line for the email",
+      "type": "string",
+      "required": true,
+      "default": null
+    },
+    {
+      "name": "email_body",
+      "description": "Main content/message of the email",
+      "type": "string",
+      "required": true,
+      "default": null
+    }
+  ],
+  "created_at": "2026-01-02T19:45:15.081333",
+  "updated_at": "2026-01-02T19:45:15.081379",
+  "version": 1,
+  "success_count": 0,
+  "failure_count": 0,
+  "last_success": null,
+  "last_failure": null,
+  "source_exploration_id": "c0b37e33",
+  "source_docs": null
+}
