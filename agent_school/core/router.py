@@ -17,7 +17,7 @@ Now with Agent Certification support:
 
 import json
 import asyncio
-from typing import Dict, Any, Literal, Optional
+from typing import Dict, Any, Literal, Optional, List
 from anthropic import Anthropic
 from openai import OpenAI
 
@@ -38,6 +38,13 @@ try:
     CERTIFICATION_AVAILABLE = True
 except ImportError:
     CERTIFICATION_AVAILABLE = False
+
+# Entity Registry for instant name→identity lookups
+try:
+    from ..entities import EntityRegistry
+    ENTITY_REGISTRY_AVAILABLE = True
+except ImportError:
+    ENTITY_REGISTRY_AVAILABLE = False
 
 class Router:
     """
@@ -77,6 +84,12 @@ class Router:
             self.drift_detector = DriftDetector(self.explorer, self.synthesizer)
         else:
             self.cert_registry = None
+        
+        # Initialize entity registry for name→identity lookups
+        if ENTITY_REGISTRY_AVAILABLE:
+            self.entity_registry = EntityRegistry()
+        else:
+            self.entity_registry = None
 
     def route(self, user_input: str) -> Dict[str, Any]:
         """
@@ -219,8 +232,11 @@ Analyze the intent and respond with JSON only."""
         print(f"[INFO] Browser task: {task}")
         print(f"[INFO] Domain: {domain}")
         
-        # Check for existing certification
+        # Check for existing certification - try both extracted task and full user_input
         cert = self.cert_registry.find_for_task(task, domain)
+        if not cert:
+            # Patterns like "send.*email.*to.*" need full user input to match
+            cert = self.cert_registry.find_for_task(user_input, domain)
         
         if cert:
             # Phase C: Execute cached certification
@@ -250,13 +266,30 @@ Analyze the intent and respond with JSON only."""
                     missing_params.append(param.name)
             
             if missing_params:
-                # Fall back to exploration - can't execute without required params
-                print(f"[INFO] Missing required params: {missing_params}. Falling back to exploration...")
-                return self._explore_and_certify(
-                    extracted_info.get("task", user_input), 
-                    extracted_info.get("domain", self._infer_domain(user_input)),
-                    user_input
-                )
+                # Try to resolve missing params from Entity Registry
+                resolved_any = False
+                if self.entity_registry:
+                    resolved_any = self._try_resolve_entities(
+                        user_input, params, missing_params, cert
+                    )
+                
+                # Recheck after entity resolution
+                if resolved_any:
+                    missing_params = [
+                        p.name for p in cert.parameters 
+                        if p.required and p.name not in params
+                    ]
+                
+                if missing_params:
+                    # Still missing params - fall back to exploration
+                    print(f"[INFO] Missing required params: {missing_params}. Falling back to exploration...")
+                    return self._explore_and_certify(
+                        extracted_info.get("task", user_input), 
+                        extracted_info.get("domain", self._infer_domain(user_input)),
+                        user_input
+                    )
+                else:
+                    print(f"[INFO] 🚀 Resolved entities from registry - instant execution!")
             
             # Execute with self-healing
             result, updated_cert = asyncio.get_event_loop().run_until_complete(
@@ -336,6 +369,9 @@ Analyze the intent and respond with JSON only."""
                 print(f"[WARN] Certification synthesis failed: {synth_err}")
                 # Continue - task may have still succeeded
             
+            # Learn entities from exploration for instant lookups next time
+            self._learn_entities_from_exploration(result, user_input)
+            
             response_suffix = "\n\n📚 I've learned this workflow! Next time will be instant." if cert_saved else ""
             
             return {
@@ -353,6 +389,169 @@ Analyze the intent and respond with JSON only."""
                 "response": f"❌ Error during exploration: {e}"
             }
 
+    def _try_resolve_entities(
+        self,
+        user_input: str,
+        params: Dict[str, Any],
+        missing_params: List[str],
+        cert: Any,
+    ) -> bool:
+        """
+        Try to resolve missing parameters using Entity Registry and smart extraction.
+        
+        Looks for names in user_input and resolves them to platform identities.
+        Also extracts subject/body from 'about X' patterns.
+        Returns True if any params were resolved.
+        """
+        import re
+        
+        resolved_any = False
+        
+        # Check for email-related params
+        email_param_names = ["recipient_email", "email", "to", "recipient"]
+        for param_name in missing_params:
+            if param_name in email_param_names:
+                # Try to extract a name from the input
+                # Look for patterns like "to [Name]" or "[Name] about"
+                name_patterns = [
+                    r'(?:to|email|send.*?to)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)',
+                    r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:about|regarding)',
+                ]
+                
+                for pattern in name_patterns:
+                    match = re.search(pattern, user_input)
+                    if match:
+                        name = match.group(1)
+                        # Try to find in registry
+                        identity = self.entity_registry.get_identity(name, "gmail")
+                        if identity:
+                            params[param_name] = identity
+                            print(f"[INFO] 📇 Resolved '{name}' → {identity} from Entity Registry")
+                            resolved_any = True
+                            break
+                
+                if param_name in params:
+                    continue  # Already resolved
+        
+        # Extract email subject from "about X" pattern
+        if "email_subject" in missing_params:
+            about_match = re.search(r'about\s+(.+?)(?:\s*$|\s+and\s+)', user_input, re.IGNORECASE)
+            if about_match:
+                topic = about_match.group(1).strip()
+                # Clean up and capitalize
+                subject = topic.title() if len(topic) < 50 else topic[:50].title()
+                params["email_subject"] = subject
+                print(f"[INFO] 📝 Extracted subject: '{subject}'")
+                resolved_any = True
+        
+        # Use LLM to generate email body if still missing subject or body
+        if "email_body" in missing_params or "email_subject" in missing_params:
+            generated = self._llm_extract_email_params(user_input, params)
+            if generated:
+                if "email_subject" not in params and "subject" in generated:
+                    params["email_subject"] = generated["subject"]
+                    print(f"[INFO] 🤖 LLM generated subject: '{generated['subject']}'")
+                    resolved_any = True
+                if "email_body" not in params and "body" in generated:
+                    params["email_body"] = generated["body"]
+                    print(f"[INFO] 🤖 LLM generated body")
+                    resolved_any = True
+        
+        return resolved_any
+    
+    def _llm_extract_email_params(
+        self, 
+        user_input: str, 
+        existing_params: Dict[str, Any]
+    ) -> Optional[Dict[str, str]]:
+        """Use LLM to generate email subject and body from user request."""
+        try:
+            prompt = f"""Given this user request to send an email:
+"{user_input}"
+
+Generate an appropriate email subject line and body.
+The recipient email is: {existing_params.get('recipient_email', 'unknown')}
+
+Respond in JSON format:
+{{"subject": "...", "body": "..."}}
+
+Keep it natural and friendly. The body should be 2-4 sentences."""
+
+            if self.llm_provider == "anthropic":
+                response = self.client.messages.create(
+                    model="claude-3-5-haiku-20241022",  # Fast model for quick extraction
+                    max_tokens=256,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                text = response.content[0].text
+            else:
+                response = self.client.chat.completions.create(
+                    model="gpt-4o-mini",  # Fast model
+                    max_tokens=256,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                text = response.choices[0].message.content
+            
+            # Parse JSON response
+            import json
+            # Find JSON in response
+            start = text.find("{")
+            end = text.rfind("}") + 1
+            if start >= 0 and end > start:
+                return json.loads(text[start:end])
+        except Exception as e:
+            print(f"[WARN] LLM extraction failed: {e}")
+        return None
+    
+    def _learn_entities_from_exploration(
+        self,
+        result: Any,  # ExplorationResult
+        user_input: str,
+    ) -> None:
+        """
+        Learn entities from a successful exploration.
+        
+        Extracts discovered identities (emails, handles) and registers
+        them in the Entity Registry for future instant lookups.
+        """
+        if not self.entity_registry:
+            return
+        
+        if not result.success or not result.action_log:
+            return
+        
+        import re
+        
+        # Look for email addresses typed during exploration
+        for action in result.action_log.actions:
+            if action.action_type in ["input", "type"]:
+                value = action.value or ""
+                
+                # Check if it looks like an email
+                email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', value)
+                if email_match:
+                    email = email_match.group(0)
+                    
+                    # Try to find the name that was searched for
+                    # Look in the user_input for names
+                    name_patterns = [
+                        r'(?:to|email|send.*?to|message|contact)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)',
+                    ]
+                    
+                    for pattern in name_patterns:
+                        name_match = re.search(pattern, user_input)
+                        if name_match:
+                            name = name_match.group(1)
+                            
+                            # Register the entity
+                            entity = self.entity_registry.register(
+                                canonical_name=name,
+                                platform="gmail",
+                                identity=email,
+                                metadata={"learned_from": result.exploration_id}
+                            )
+                            print(f"[INFO] 📚 Learned entity: {name} → {email}")
+                            return  # Only learn one per exploration
     
     def _infer_domain(self, user_input: str) -> str:
         """Infer domain from user input."""

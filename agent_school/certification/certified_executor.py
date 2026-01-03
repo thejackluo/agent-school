@@ -50,9 +50,14 @@ class CertifiedExecutor:
     """
     
     def __init__(self, headless: bool = True):
+        import os
         self.headless = headless
         self._browser = None
         self._page = None
+        
+        # Use same persistent profile as explorer for shared auth sessions
+        self.profile_dir = os.path.expanduser("~/.agent-school/browser_profile")
+        os.makedirs(self.profile_dir, exist_ok=True)
     
     async def execute(
         self,
@@ -83,6 +88,9 @@ class CertifiedExecutor:
             
             # Initialize browser
             await self._init_browser()
+            
+            # Navigate to domain before executing steps
+            await self._navigate_to_domain(cert.domain)
             
             # Execute each step
             for step in bound_steps:
@@ -137,16 +145,18 @@ class CertifiedExecutor:
         )
     
     async def _init_browser(self):
-        """Initialize Playwright browser"""
+        """Initialize browser using Browser Use's Browser class for shared auth"""
         try:
-            from playwright.async_api import async_playwright
+            from browser_use import Browser
             
-            self._playwright = await async_playwright().start()
-            self._browser = await self._playwright.chromium.launch(
-                headless=self.headless
+            # Use Browser Use's browser with same profile as explorer
+            self._browser = Browser(
+                headless=self.headless,
+                user_data_dir=self.profile_dir,  # Same profile as explorer!
             )
             self._context = await self._browser.new_context()
-            self._page = await self._context.new_page()
+            pages = self._context.pages
+            self._page = pages[0] if pages else await self._context.new_page()
             
         except Exception as e:
             raise RuntimeError(f"Failed to initialize browser: {e}")
@@ -154,16 +164,30 @@ class CertifiedExecutor:
     async def _close_browser(self):
         """Close browser and cleanup"""
         try:
-            if self._page:
-                await self._page.close()
-            if self._context:
-                await self._context.close()
             if self._browser:
                 await self._browser.close()
-            if hasattr(self, '_playwright') and self._playwright:
-                await self._playwright.stop()
         except:
             pass
+    
+    async def _navigate_to_domain(self, domain: str) -> None:
+        """Navigate to the domain URL based on certification domain."""
+        # Map domains to URLs
+        domain_urls = {
+            "email": "https://mail.google.com",
+            "gmail": "https://mail.google.com",
+            "mail.google.com": "https://mail.google.com",
+            "docs": "https://docs.google.com",
+            "docs.google.com": "https://docs.google.com",
+            "sheets": "https://sheets.google.com",
+            "sheets.google.com": "https://sheets.google.com",
+        }
+        
+        url = domain_urls.get(domain.lower(), f"https://{domain}")
+        
+        print(f"[INFO] 🌐 Navigating to {url}...")
+        await self._page.goto(url, wait_until="domcontentloaded")
+        # Wait longer for Gmail's dynamic content to fully load
+        await self._page.wait_for_timeout(5000)
     
     async def _execute_step(self, step: CertStep) -> Optional[Any]:
         """Execute a single certification step"""
@@ -227,9 +251,20 @@ class CertifiedExecutor:
         strategy = step.selector_strategy or SelectorStrategy.TEXT
         value = step.selector_value
         
+        print(f"[DEBUG] Finding element: strategy={strategy}, value='{value}'")
+        
         if strategy == SelectorStrategy.TEXT:
-            # Find by visible text
-            selector = f"text={value}"
+            # For buttons, try role-based first, then fallback to text
+            # Gmail's Compose is a div with role="button"
+            try:
+                # Try role=button with text first
+                locator = self._page.get_by_role("button", name=value)
+                await locator.wait_for(timeout=step.timeout_ms)
+                print(f"[DEBUG] Found via role=button")
+                return locator.first
+            except:
+                # Fallback to text selector
+                selector = f"text={value}"
         elif strategy == SelectorStrategy.ARIA_LABEL:
             selector = f"[aria-label='{value}']"
         elif strategy == SelectorStrategy.PLACEHOLDER:
@@ -244,6 +279,7 @@ class CertifiedExecutor:
             selector = f"text={value}"
         
         # Wait for element and return
+        print(f"[DEBUG] Using selector: {selector}")
         await self._page.wait_for_selector(selector, timeout=step.timeout_ms)
         return self._page.locator(selector).first
     
